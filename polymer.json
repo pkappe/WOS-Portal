@@ -1,0 +1,16 @@
+{
+    "lint": {
+        "rules": [
+            "polymer-2"
+        ]
+    },
+    "entrypoint": "public/index.html",
+    "sources": [
+        "public/**/*",
+        "public/assets/images/**/*",
+        "bower.json"
+    ],
+    "extraDependencies": [
+        "./public/bower_components/webcomponentsjs/webcomponents-lite.min.js"
+    ]
+}

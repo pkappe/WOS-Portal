@@ -1,0 +1,181 @@
+<link rel="import" href="bower_components/app-layout/app-toolbar/app-toolbar.html">
+<link rel="import" href="bower_components/app-layout/app-drawer/app-drawer.html">
+<link rel="import" href="bower_components/paper-button/paper-button.html">
+<link rel="import" href="bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="bower_components/paper-menu-button/paper-menu-button.html">
+<link rel="import" href="bower_components/paper-listbox/paper-listbox.html">
+<link rel="import" href="bower_components/iron-pages/iron-pages.html">
+<link rel="import" href="assets/font-awesome/css/font-awesome.html">
+<dom-module id="wos-main">
+    <template>
+      <style include="font-awesome">
+        .title{
+          margin-left: 5px;
+        }
+
+        .fa{
+          padding-top: 12px;
+          padding-left: 11px;
+        }
+        paper-button{
+          display: block;
+          padding: 7px;
+        }
+
+        paper-button:focus{
+            background: #013B82;
+            font-weight: 300;
+            color: white;
+        }
+
+        img{
+          width: 100px;
+        }
+
+        app-toolbar{
+            --app-toolbar-font-size: 16px;
+            box-shadow: 0px 1px 8px #888888;
+        }
+
+        .leftNav{
+            position: absolute;
+            width: 200px;
+            height: 100%;
+            display: block;
+            border-right: 1px solid grey;
+            margin-right: 5px;
+            padding-top: 15px;
+            transition: 0.3s;
+        }
+
+        .leftNav paper-button:hover{
+            transition: 0.3s;
+            padding-left: 20px;
+        }
+
+        .content{
+            margin-left: 250px;
+            align-content: center;
+        }
+
+        #userName{
+            padding: 10px;
+            display: block;
+        }
+
+        iron-pages{
+            position: absolute;
+            top: 65px;
+            left: 200px;
+            background: #ECEFF1;
+            padding: 35px;
+            height: 100%;
+            z-index: -1;
+        }
+      </style>
+   
+        <app-toolbar> 
+            <span class="title" main-title><img src="assets/images/wos-logo-trans.png"></img></span>
+            <paper-menu-button vertical-align="top" horizontal-align="right">
+                <paper-icon-button slot="dropdown-trigger" class="fa fa-cog fa-lg"></paper-icon-button>
+                <paper-listbox slot="dropdown-content">
+                    <paper-button>Profile</paper-button>
+                    <paper-button on-tap="logout">Log Out</paper-button>
+                    <hr>
+                    <div id="userName">[[user.email]]</div>
+                </paper-listbox>
+            </paper-menu-button>
+        </app-toolbar>
+     
+      <div class="leftNav">
+          <paper-listbox>
+            <paper-button focus on-tap="callDashboard">Dashboard</paper-button>
+            <paper-button on-tap="callCalendar">Calendar</paper-button>
+            <paper-button>Classes</paper-button>
+            <paper-button on-tap="callDocuments"> Documents</paper-button>
+            <paper-button>Schedule</paper-button>
+          </paper-listbox>
+      </div>
+      <firebase-auth id="auth" user="{{user}}" provider="google" on-error="handleError">
+
+      <app-location route="{{route}}"></app-location>
+      <app-route
+        route="{{route}}"
+        pattern="/:page"
+        data="{{data}}"
+        tail="{{tail}}">
+      </app-route>
+
+      <div class="content">
+      <iron-pages
+        selected="[[page]]"
+        attr-for-selected="name"
+        role="main">
+        <wos-dashboard name="dashboard"></wos-dashboard>
+        <wos-documents name="documents"></wos-documents>
+        <wos-calendar name="calendar"></wos-calendar>
+      </iron-pages>
+
+      </div>
+      
+    </template>
+    <script>
+        Polymer({
+            is: 'wos-main',
+            properties: {
+                email: {
+                    type: String
+                },
+                password: {
+                    type: String
+                },
+                user: {
+                    type: Object
+                },
+                statusKnown: {
+                    type: Object
+                },
+                page: {
+                    type: String,
+                    reflectToAttribute: true,
+                    observer: '_pageChanged',
+                    value: "dashboard"
+                }
+            },
+
+            logout: function() {
+                this.$.auth.signOut()
+            },
+
+            observers: [
+                '_routePageChanged(routeData.page)',
+            ],
+
+            _routePageChanged: function(page) {
+                this.page = page || 'view1';
+
+                if (!this.$.drawer.persistent) {
+                    this.$.drawer.close();
+                }
+            },
+
+            _pageChanged: function(page) {
+                // Load page import on demand. Show 404 page if fails
+                var resolvedPageUrl = this.resolveUrl("wos-" + page + '.html');
+                this.importHref(resolvedPageUrl, null, this._showPage404, true);
+            },
+
+            callDocuments: function() {
+                this.page = "documents"
+            },
+
+            callCalendar: function() {
+                this.page = "calendar"
+            },
+
+            callDashboard: function() {
+                this.page = "dashboard"
+            }
+        })
+    </script>
+</dom-module>

@@ -1,0 +1,143 @@
+<link rel="import" href="bower_components/paper-card/paper-card.html">
+<link rel="import" href="bower_components/paper-input/paper-input.html">
+<link rel="import" href="bower_components/paper-input/paper-textarea.html">
+<link rel="import" href="bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="bower_components/paper-progress/paper-progress.html">
+<link rel="import" href="assets/font-awesome/css/font-awesome.html">
+<link rel="import" href="bower_components/polymerfire/firebase-auth.html">
+<link rel="import" href="bower_components/polymerfire/firebase-query.html">
+
+<dom-module id="wos-dashboard">
+    <template>
+
+      <style include="font-awesome">
+        .announcements{
+          width: 40vw;
+          float: left;
+          overflow: scroll;
+          overflow-y: auto;
+          overflow-x: auto;
+          height: 80vh;
+          display: block;
+        }
+
+        paper-card{
+          display: block;
+          margin: 15px;
+          width: 35vw;
+          padding: 10px;
+        }
+
+        .progress{
+          width: 95vw;
+          display: block;
+        }
+
+        #progressText{
+          text-align: center;
+          display: inline-block;
+        }
+
+        #heading{
+          font-size: 18px;
+        }
+
+        #progressValue{
+          font-size: 21px;
+        }
+
+        paper-progress{
+          width: 40vw;
+          --paper-progress-height: 20px;
+          display: inline-block;
+          margin-left: 15px;
+        }
+
+        #plusButton{
+          margin-left: 23vw;
+          vertical-align: bottom;
+        }
+
+        .heading{
+          font-size: 28px;
+          display: inline-block;
+          vertical-align: top;
+          width: auto;
+          margin-top: 15px;
+          margin-bottom: -15px;
+        }
+
+        .heading p{
+          display: inline-block;
+        }
+
+        paper-dialog h2{
+          text-align: center;
+        }
+
+      </style>
+
+      <paper-dialog id="announceDialog">
+        <h2>Add Announcement</h2>
+        <paper-input label="Heading"></paper-input>
+        <paper-textarea label="Content"></paper-textarea>
+    </paper-dialog>
+
+      <firebase-auth id="auth" user="{{user}}" provider="google" on-error="handleError">
+      <firebase-query id="query" path="/announcements" data="{{announcements}}"></firebase-query>
+      
+
+      <div class="progress">
+        <div id="progressText">
+          <div id="heading">Progress</div>
+          <div id="progressValue">90%</div>
+        </div>
+        <paper-progress value="90"></paper-progress>
+
+      </div>
+      
+      <div class="announcements"> 
+        <div class="heading">
+          <p>Announcements<p>
+          <paper-icon-button id="plusButton" onclick="announceDialog.open()" class="fa fa-plus"></paper-icon-button>
+        </div>
+        
+        <paper-card heading="July 6 Graduation">
+          <h></h>
+          <p>Starting on July 6th some people in the cohort will be leaving to start their new careers with GE. Let's all wish them well!</p>
+        </paper-card>
+        
+
+        <template is="dom-repeat" items=[[announcements]] as="announcement">
+          <paper-card heading="announcement.heading">
+            <p>[[announcement.content]]</p>
+          </paper-card>
+        </template>
+
+    </div>
+
+
+
+    </template>
+    <script>
+        Polymer({
+            is: 'wos-dashboard',
+            properties: {
+                announcements: {
+                    type: Object
+                }
+            },
+
+            announceDialogPopup: function() {
+                console.log("Opening")
+                this.$.alignedDialog.open()
+            },
+
+            handleError: function(err) {
+                console.log(err)
+            }
+
+
+        })
+    </script>
+</dom-module>

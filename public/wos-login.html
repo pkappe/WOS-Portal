@@ -1,0 +1,88 @@
+<link rel="import" href="bower_components/polymer/polymer.html">
+<link rel="import" href="bower_components/polymerfire/firebase-auth.html">
+<link rel="import" href="bower_components/paper-button/paper-button.html">
+<link rel="import" href="bower_components/paper-input/paper-input.html">
+<link rel="import" href="wos-main.html">
+
+<dom-module id="wos-login">
+    <template>
+      <style>
+      .login {
+        background: white;
+        margin: auto;
+        height: 600px;
+        width: 400px;
+        margin-top: 5vh;
+      }
+
+      .wosHeader {
+        margin: auto;
+        text-align: center;
+      }
+
+      paper-input {
+        width: 80%;
+        margin: auto;
+        text-align: left;
+      }
+
+      paper-button {
+        margin-top: 75px;
+        padding: 20px;
+      }
+    </style>
+    <template is="dom-if" if=[[!user]]>
+          <div class="login">
+      <div class="wosHeader">
+        
+    <img src="assets/images/WOS-Logo.png" />
+    <paper-input label="Email Address" type="email" value="{{email}}"></paper-input>
+    <paper-input label="Password" type="password" value="{{password}}"></paper-input>
+    <paper-button hidden="{{user}}" on-click="login">Login</paper-button>
+    <paper-button hidden="{{!user}}" on-click="logout">Log out</paper-button>
+    <paper-button>New User</paper-button>
+    </div>
+    </div>
+      </template>
+
+    <template is="dom-if" if=[[user]]>
+        <wos-main></wos-main>
+      </template>
+
+    <firebase-auth id="auth" user="{{user}}" provider="google" on-error="handleError">
+    </firebase-auth>
+
+    <template is="dom-if" if=[[user]]>
+
+      </template>
+    </template>
+    <script>
+        Polymer({
+            is: 'wos-login',
+            properties: {
+                email: {
+                    type: String
+                },
+                password: {
+                    type: String
+                },
+                user: {
+                    type: Object
+                },
+                statusKnown: {
+                    type: Object
+                }
+            },
+
+            login: function() {
+                this.$.auth.signInWithEmailAndPassword(this.email, this.password)
+                    .catch(function(error) {
+                        alert("Unable to login: " + error)
+                    })
+            },
+            logout: function() {
+                this.$.auth.signOut()
+            }
+        })
+    </script>
+</dom-module>
