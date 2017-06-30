@@ -1,12 +1,180 @@
 <link rel="import" href="bower_components/polymer/polymer.html">
+<link rel="import" href="bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="bower_components/polymerfire/firebase-document.html">
+<link rel="import" href="bower_components/polymerfire/firebase-auth.html">
+<link rel="import" href="bower_components/polymerfire/firebase-query.html">
+
 
 <dom-module id="wos-documents">
     <template>
-      <h1>DOCUMENTS</h1>
+        <style>
+            paper-card{
+                vertical-align: top;
+                margin: 10px;
+                
+            }
+            paper-card img{
+                width: 300px;
+                max-height: 200px;
+                object-fit: contain;
+                cursor: pointer;
+            }
+
+            paper-card p{
+                color: red;
+                font-weight: bold;
+            }
+
+            .cardContent{
+                border-top: 1px solid rgba(40, 40, 40, 0.3);
+                padding: 10px;
+                margin-top: 5px;
+            }
+        </style>
+        
+        <firebase-auth id="auth" user="{{user}}" provider="google" on-error="handleError"></firebase-auth>
+        <!--<firebase-query id="query" path="/users/documents" data="{{documents}}" data-changed="queryResponse"></firebase-query>-->
+        
+        <template id="documentsTemplate" is="dom-repeat" items="{{documents}}" as="document">
+            <paper-card heading="[[document.title]]">
+                <img on-tap="thumbTap" src="[[document.thumbnail]]"></img>
+                <div class="cardContent">
+                    <p>[[document.status]]</p>
+                    <paper-button raised class="indigo" on-tap="downloadForm">Download</paper-button>
+                    <paper-button raised class="indigo" on-tap="uploadDialog">Upload</paper-button>
+                </div>
+               
+            </paper-card>
+        </template>
+
+    <paper-dialog id="previewDialog">
+        <img src="[[imgPath]]"></img>
+    </paper-dialog>
+
+    <paper-dialog id="uploadDialog">
+        <h2>Upload [[uploadTitle]]</h2>
+        <paper-input type="file"></paper-input>
+        <paper-button on-tap="uploadCancel">Cancel</paper-button>
+        <paper-button raised on-tap="uploadSubmit">Submit</paper-button>
+
+    </paper-dialog>
     </template>
     <script>
         Polymer({
-            is: 'wos-documents'
+            is: 'wos-documents',
+            properties: {
+                user: {
+                    type: Object
+                },
+                documents: {
+                    type: Array,
+                    value: [{
+                        title: 'Direct Deposit',
+                        status: 'Incomplete',
+                        loc: 'assets/docs/wos-hr/DirectDeposit.pdf',
+                        thumbnail: 'assets/images/doc-thumbnails/DirectDeposit.png'
+                    }, {
+                        title: 'Employee Handbook',
+                        status: 'Incomplete',
+                        loc: 'assets/docs/wos-hr/EmployeeHandbookReceipt.pdf',
+                        thumbnail: 'assets/images/doc-thumbnails/EmployeeHandbookReceipt.png'
+                    }, {
+                        title: 'I-9',
+                        status: 'Incomplete',
+                        loc: 'assets/docs/wos-hr/i9.pdf',
+                        thumbnail: 'assets/images/doc-thumbnails/i9.png'
+                    }, {
+                        title: 'Journal Consent Form',
+                        status: 'Incomplete',
+                        loc: 'assets/docs/wos-hr/JournalConsent.pdf',
+                        thumbnail: 'assets/images/doc-thumbnails/JournalConsent.png'
+                    }, {
+                        title: 'Technology Acceptance',
+                        status: 'Incomplete',
+                        loc: 'assets/docs/wos-hr/TechnologyAcceptableUsePolicyForm.docx',
+                        thumbnail: 'assets/images/doc-thumbnails/TechnologyAcceptableUsePolicy.png'
+                    }, {
+                        title: 'Transit Check',
+                        status: 'Incomplete',
+                        loc: 'assets/docs/wos-hr/TransitCheck.pdf',
+                        thumbnail: 'assets/images/doc-thumbnails/TransitCheck.png'
+                    }, {
+                        title: 'W-4',
+                        status: 'Incomplete',
+                        loc: 'assets/docs/wos-hr/w4.pdf',
+                        thumbnail: 'assets/images/doc-thumbnails/w4.png'
+                    }, {
+                        title: 'Application',
+                        status: 'Incomplete',
+                        loc: 'assets/docs/wos-hr/WOSApplication.pdf',
+                        thumbnail: 'assets/images/doc-thumbnails/Application.png'
+                    }, {
+                        title: 'Background Check',
+                        status: 'Incomplete',
+                        loc: 'assets/docs/wos-hr/WOSBGCheckAuth.pdf',
+                        thumbnail: 'assets/images/doc-thumbnails/BackgroundCheck.png'
+                    }]
+                },
+                imgPath: {
+                    type: String,
+                    value: ''
+                },
+                uploadTitle: {
+                    type: String,
+                    value: ''
+                }
+
+            },
+
+            thumbTap: function(e) {
+                this.imgPath = e.path[0].currentSrc
+                this.$.previewDialog.open()
+                this.$.previewDialog.open()
+            },
+
+            downloadForm: function(e) {
+                var form = e.model.__data.document.loc
+                window.open(form)
+            },
+
+            uploadDialog: function(e) {
+                this.uploadTitle = e.model.__data.document.title
+                this.$.uploadDialog.open()
+            },
+
+            uploadCancel: function() {
+                this.uploadTitle = ''
+                this.$.uploadDialog.close()
+            },
+
+            uploadSubmit: function(e) {
+                var index = this.getArrayIndex(this.uploadTitle)
+                this.documents[index].status = 'Complete'
+                this.documents.push()
+
+            },
+            getArrayIndex: function(title) {
+                switch (title) {
+                    case 'Direct Deposit':
+                        return 0
+                    case 'Employee Handbook':
+                        return 1
+                    case 'I-9':
+                        return 2
+                    case 'Journal Consent Form':
+                        return 3
+                    case 'Technology Acceptance':
+                        return 4
+                    case 'Transit Check':
+                        return 5
+                    case 'W-4':
+                        return 6
+                    case 'Application':
+                        return 7
+                    case 'Background Check':
+                        return 8
+                }
+            }
         })
     </script>
 </dom-module>

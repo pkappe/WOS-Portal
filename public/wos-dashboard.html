@@ -3,6 +3,7 @@
 <link rel="import" href="bower_components/paper-input/paper-textarea.html">
 <link rel="import" href="bower_components/paper-dialog/paper-dialog.html">
 <link rel="import" href="bower_components/paper-progress/paper-progress.html">
+<link rel="import" href="bower_components/paper-toast/paper-toast.html">
 <link rel="import" href="assets/font-awesome/css/font-awesome.html">
 <link rel="import" href="bower_components/polymerfire/firebase-auth.html">
 <link rel="import" href="bower_components/polymerfire/firebase-query.html">
@@ -13,12 +14,24 @@
       <style include="font-awesome">
         .announcements{
           width: 40vw;
-          float: left;
-          overflow: scroll;
-          overflow-y: auto;
-          overflow-x: auto;
           height: 80vh;
-          display: block;
+          display: inline-block;
+        }
+
+        #plusButton{
+          position: absolute;
+          right: 30px;
+          top: 25px;
+        }
+
+        .heading{
+          font-size: 28px;
+          display: inline-block;
+          vertical-align: top;
+          width: 100%;
+          margin-top: 15px;
+          margin-bottom: -15px;
+          position: relative;
         }
 
         paper-card{
@@ -53,70 +66,66 @@
           margin-left: 15px;
         }
 
-        #plusButton{
-          margin-left: 23vw;
-          vertical-align: bottom;
-        }
-
-        .heading{
-          font-size: 28px;
-          display: inline-block;
-          vertical-align: top;
-          width: auto;
-          margin-top: 15px;
-          margin-bottom: -15px;
-        }
+        
 
         .heading p{
           display: inline-block;
+        }
+
+        paper-dialog{
+          width: 50%;
+          height: 80%
         }
 
         paper-dialog h2{
           text-align: center;
         }
 
+        .dialogButtons{
+          position: absolute;
+          bottom: 15px;
+          right: 15px;
+        }
+
       </style>
 
-      <paper-dialog id="announceDialog">
-        <h2>Add Announcement</h2>
-        <paper-input label="Heading"></paper-input>
-        <paper-textarea label="Content"></paper-textarea>
-    </paper-dialog>
-
       <firebase-auth id="auth" user="{{user}}" provider="google" on-error="handleError">
-      <firebase-query id="query" path="/announcements" data="{{announcements}}"></firebase-query>
+      <firebase-query id="query" path="/announcements" data="{{announcements}}" data-changed="queryResponse"></firebase-query>
       
-
       <div class="progress">
         <div id="progressText">
           <div id="heading">Progress</div>
           <div id="progressValue">90%</div>
         </div>
         <paper-progress value="90"></paper-progress>
-
       </div>
       
       <div class="announcements"> 
         <div class="heading">
           <p>Announcements<p>
-          <paper-icon-button id="plusButton" onclick="announceDialog.open()" class="fa fa-plus"></paper-icon-button>
+          <paper-icon-button id="plusButton" on-tap="announceDialogPopup" class="fa fa-plus"></paper-icon-button>
         </div>
-        
-        <paper-card heading="July 6 Graduation">
-          <h></h>
-          <p>Starting on July 6th some people in the cohort will be leaving to start their new careers with GE. Let's all wish them well!</p>
-        </paper-card>
-        
-
+      
         <template is="dom-repeat" items=[[announcements]] as="announcement">
-          <paper-card heading="announcement.heading">
+          <paper-card heading="[[announcement.heading]]">
+            <p>[[announcement.date]]</p>
             <p>[[announcement.content]]</p>
           </paper-card>
         </template>
 
     </div>
 
+    <paper-dialog id="announceDialog">
+        <h2>Add Announcement</h2>
+        <paper-input label="Heading" value="{{newHeading}}"></paper-input>
+        <paper-textarea label="Content" value="{{newContent}}" max-rows="5"></paper-textarea>
+        <div class="dialogButtons">
+            <paper-button on-tap="announceDialogClose">Cancel</paper-button>
+            <paper-button raised on-tap="addNewAnnouncement">Done</paper-button>
+        </div>
+    </paper-dialog>
 
+    <paper-toast id="announceToast" text="[[toastMessage]]"></paper-toast>
 
     </template>
     <script>
@@ -125,18 +134,49 @@
             properties: {
                 announcements: {
                     type: Object
+                },
+                newHeading: {
+                    type: String,
+                    value: ''
+                },
+                newContent: {
+                    type: String,
+                    value: ''
+                },
+                toastMessage: {
+                    type: String,
+                    value: ''
                 }
             },
 
+            ready: function() {
+                console.log(this.user)
+            },
+
             announceDialogPopup: function() {
-                console.log("Opening")
-                this.$.alignedDialog.open()
+                this.$.announceDialog.open()
+            },
+
+            announceDialogClose: function() {
+                this.$.announceDialog.close()
             },
 
             handleError: function(err) {
                 console.log(err)
+            },
+            addNewAnnouncement: function() {
+                var nowDate = new Date().toLocaleString()
+                this.$.query.ref.push({
+                    date: nowDate,
+                    heading: this.newHeading,
+                    content: this.newContent
+                })
+                this.$.announceDialog.close()
+                this.toastMessage = this.newHeading + " has been added!"
+                this.$.announceToast.open()
+                this.newHeading = ""
+                this.newContent = ""
             }
-
 
         })
     </script>

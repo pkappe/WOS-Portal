@@ -22,12 +22,6 @@
           padding: 7px;
         }
 
-        paper-button:focus{
-            background: #013B82;
-            font-weight: 300;
-            color: white;
-        }
-
         img{
           width: 100px;
         }
@@ -53,6 +47,12 @@
             padding-left: 20px;
         }
 
+        .leftNav paper-button:focus{
+            background: #013B82;
+            font-weight: 300;
+            color: white;
+        }
+
         .content{
             margin-left: 250px;
             align-content: center;
@@ -61,6 +61,7 @@
         #userName{
             padding: 10px;
             display: block;
+            font-size: 14px;
         }
 
         iron-pages{
@@ -71,18 +72,18 @@
             padding: 35px;
             height: 100%;
             z-index: -1;
+            width: 100%;
         }
       </style>
    
         <app-toolbar> 
             <span class="title" main-title><img src="assets/images/wos-logo-trans.png"></img></span>
+            <div id="userName">[[user.uid]]</div>
             <paper-menu-button vertical-align="top" horizontal-align="right">
                 <paper-icon-button slot="dropdown-trigger" class="fa fa-cog fa-lg"></paper-icon-button>
                 <paper-listbox slot="dropdown-content">
                     <paper-button>Profile</paper-button>
                     <paper-button on-tap="logout">Log Out</paper-button>
-                    <hr>
-                    <div id="userName">[[user.email]]</div>
                 </paper-listbox>
             </paper-menu-button>
         </app-toolbar>
@@ -96,7 +97,7 @@
             <paper-button>Schedule</paper-button>
           </paper-listbox>
       </div>
-      <firebase-auth id="auth" user="{{user}}" provider="google" on-error="handleError">
+      <firebase-auth id="auth" user="{{user}}" provider="google" on-error="handleError"></firebase-auth>
 
       <app-location route="{{route}}"></app-location>
       <app-route
@@ -106,7 +107,6 @@
         tail="{{tail}}">
       </app-route>
 
-      <div class="content">
       <iron-pages
         selected="[[page]]"
         attr-for-selected="name"
@@ -116,7 +116,6 @@
         <wos-calendar name="calendar"></wos-calendar>
       </iron-pages>
 
-      </div>
       
     </template>
     <script>
